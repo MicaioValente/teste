@@ -2,9 +2,10 @@ import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-// import * as DocumentPicker from 'expo-document-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import {useState } from 'react'
-import DocumentPicker from 'react-native-document-picker';
+// import DocumentPicker from 'react-native-document-picker';
+// import DocumentPicker from 'react-native-document-picker';
 export default function App() {
 const [singleFile, setSingleFile] = useState(null);
 
@@ -16,9 +17,10 @@ const [singleFile, setSingleFile] = useState(null);
    
       // console.log('response', response)
       try {
-        const resp = await DocumentPicker.pickMultiple({
-          type: [DocumentPicker.types.allFiles],
-        });
+        // const resp = await DocumentPicker.pickMultiple({
+        //   type: [DocumentPicker.types.allFiles],
+        // });
+        let resp = await DocumentPicker.getDocumentAsync({});
         console.log('resp', resp)
         const data = new FormData();
           data.append('fileUploader', 1);
