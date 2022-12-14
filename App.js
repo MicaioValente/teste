@@ -5,25 +5,31 @@ import DocumentPicker from 'react-native-document-picker';
 export default function App() {
   const _pickDocument = async () => {
       try {
-        const resp = await DocumentPicker.pickMultiple({
+        const documents = await DocumentPicker.pickMultiple({
           type: [DocumentPicker.types.allFiles],
         });
-        console.log('resp', resp)
-        const data = new FormData();
-          data.append('fileUploader', 1);
-          resp.forEach((file) => data.append('Files', file))
+
+        const body = new FormData();
+        body.append('fileUploader', 1)
+        documents.forEach(document => {
+          body.append(`Files`, document)
+        })
+
+        console.log(JSON.stringify(body))
           
         let res = await fetch(
           'https://app.obstcare.com/api/Documents/Gestation/08dad806-5227-4a53-8f83-2e467c6d8665',
           {
-            method: 'post',
-            body: data,
+            method: 'POST',
+            body,
             headers: {
-              'Content-Type': 'multipart/form-data; ',
-              
+              Accept: '*/*',
+              'Content-Type': 'multipart/form-data',
             },
           }
         );
+        const text = await res.text()
+        console.log('text', text)
         const response = await res.json()
         console.log('response', response)
       }catch (e){
