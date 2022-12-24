@@ -1,60 +1,137 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity
+} from 'react-native';
+
 import DocumentPicker from 'react-native-document-picker';
 
-export default function App() {
-  const _pickDocument = async () => {
-      try {
-        const documents = await DocumentPicker.pickMultiple({
-          type: [DocumentPicker.types.allFiles],
-        });
+const App = () => {
+  const [singleFile, setSingleFile] = useState(null);
 
-        const body = new FormData();
-        body.append('fileUploader', 1)
-        documents.forEach(document => {
-          body.append(`Files`, document)
-        })
+  const uploadImage = async () => {
+    if (singleFile != null) {
+      const fileToUpload = singleFile;
+      const data = new FormData();
 
-        console.log(JSON.stringify(body))
-          
-        let res = await fetch(
-          'https://app.obstcare.com/api/Documents/Gestation/08dad806-5227-4a53-8f83-2e467c6d8665',
-          {
-            method: 'POST',
-            body,
-            headers: {
-              Accept: '*/*',
-              'Content-Type': 'multipart/form-data',
-            },
-          }
-        );
-        const text = await res.text()
-        console.log('text', text)
-        const response = await res.json()
-        console.log('response', response)
-      }catch (e){
-        console.log('error', e)
+      data.append('fileUploader', '1');
+      data.append('Files', fileToUpload);
+
+      let res = await fetch(
+        'https://app.obstcare.com/api/Documents/Gestation/08dad806-5227-4a53-8f83-2e467c6d8665',
+        {
+          method: 'post',
+          body: data,
+          headers: {
+            'Content-Type': 'multipart/form-data; ',
+          },
+        }
+      );
+      let responseJson = await res.json();
+      if (responseJson.status == 1) {
+        alert('Upload Successful');
       }
+    } else {
+      alert('Please Select File first');
+    }
   };
 
+  const selectFile = async () => {
+    try {
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles],
+      });
+
+      console.log('res : ' + JSON.stringify(res));
+
+      setSingleFile(res);
+    } catch (err) {
+      setSingleFile(null);
+      if (DocumentPicker.isCancel(err)) {
+        alert('Canceled');
+      } else {
+        alert('Unknown Error: ' + JSON.stringify(err));
+        throw err;
+      }
+    }
+  };
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={() => _pickDocument()}>
-        <Text>Document1</Text>
+    <View style={styles.mainBody}>
+      <View style={{ alignItems: 'center' }}>
+        <Text style={{ fontSize: 30, textAlign: 'center' }}>
+          React Native File Upload Example
+        </Text>
+        <Text
+          style={{
+            fontSize: 25,
+            marginTop: 20,
+            marginBottom: 30,
+            textAlign: 'center',
+          }}>
+          www.aboutreact.com
+        </Text>
+      </View>
+      {singleFile != null ? (
+        <Text style={styles.textStyle}>
+          File Name: {singleFile.name ? singleFile.name : ''}
+          {'\n'}
+          Type: {singleFile.type ? singleFile.type : ''}
+          {'\n'}
+          File Size: {singleFile.size ? singleFile.size : ''}
+          {'\n'}
+          URI: {singleFile.uri ? singleFile.uri : ''}
+          {'\n'}
+        </Text>
+      ) : null}
+      <TouchableOpacity
+        style={styles.buttonStyle}
+        activeOpacity={0.5}
+        onPress={selectFile}>
+        <Text style={styles.buttonTextStyle}>Select File</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.buttonStyle}
+        activeOpacity={0.5}
+        onPress={uploadImage}>
+        <Text style={styles.buttonTextStyle}>Upload File</Text>
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
+  mainBody: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
   },
-  button: {
-    backgroundColor: '#0ff',
-    padding: 16
-  }
+  buttonStyle: {
+    backgroundColor: '#307ecc',
+    borderWidth: 0,
+    color: '#FFFFFF',
+    borderColor: '#307ecc',
+    height: 40,
+    alignItems: 'center',
+    borderRadius: 30,
+    marginLeft: 35,
+    marginRight: 35,
+    marginTop: 15,
+  },
+  buttonTextStyle: {
+    color: '#FFFFFF',
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  textStyle: {
+    backgroundColor: '#fff',
+    fontSize: 15,
+    marginTop: 16,
+    marginLeft: 35,
+    marginRight: 35,
+    textAlign: 'center',
+  },
 });
+
+export default App;
